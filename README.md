@@ -40,6 +40,16 @@ tlm upload-tokens create "GitHub Actions" --gh-secret TLM_UPLOAD_TOKEN
 | `version` | `latest` | The tlm version to install, e.g. `0.3.0` |
 | `verify-attestation` | `true` | Also check the download's build provenance with `gh attestation verify` |
 
+Checking the build provenance reads attestations with the job's token. If
+your workflow sets `permissions:`, add `attestations: read` (or set
+`verify-attestation: false`):
+
+```yaml
+permissions:
+  contents: read
+  attestations: read
+```
+
 Output: `tlm-version`, the version that ran. It runs on Linux and macOS
 runners, x64 and ARM64.
 

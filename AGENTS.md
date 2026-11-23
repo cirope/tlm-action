@@ -13,7 +13,8 @@
 - Never commit or run git-modifying commands unless asked; end each change
   with a commit subject of 50 characters or less.
 - Never name or point at other codebases in code, comments or docs.
-- Releases: Franco tags `vX.Y.Z` and moves `v1` to it. Say whether a
+- Releases: Franco tags `vX.Y.Z`, moves `v1` to it and publishes a GitHub
+  Release for the tag (the Marketplace lists releases). Say whether a
   change is worth releasing, with the commands.
 - Work is tracked like `../tlm-cli/AGENTS.md` says, on the board
   "Telemetría".
