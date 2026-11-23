@@ -1,0 +1,69 @@
+name: Upload source maps to Tlm
+description: Installs the tlm CLI, checked against its release, and uploads a build's source maps to Tlm.
+author: Hullop
+
+branding:
+  icon: upload-cloud
+  color: blue
+
+inputs:
+  dir:
+    description: The directory with the build, e.g. dist or public/assets.
+    required: true
+  release:
+    description: The release your app reports, exactly.
+    default: ${{ github.sha }}
+  url-prefix:
+    description: The URL path the directory is served at, e.g. /assets.
+    default: /
+  sources:
+    description: Also map scripts that have no source map line for line, for JavaScript served as written (importmap).
+    default: "false"
+  delete:
+    description: Delete the .map files after a successful upload, so they aren't deployed.
+    default: "false"
+  dry-run:
+    description: Only list what would be uploaded.
+    default: "false"
+  upload-token:
+    description: An upload token (tlmu_…). Default, the TLM_UPLOAD_TOKEN environment variable.
+    default: ""
+  dsn:
+    description: The project's DSN, which says where Tlm is. Default, the TLM_DSN environment variable.
+    default: ""
+  version:
+    description: The tlm version to install, e.g. 0.3.0. Default, the latest.
+    default: latest
+  verify-attestation:
+    description: Also check the download's signed build provenance with gh attestation verify.
+    default: "true"
+
+outputs:
+  tlm-version:
+    description: The version of tlm that ran.
+    value: ${{ steps.install.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - id: install
+      name: Install tlm
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        VERIFY_ATTESTATION: ${{ inputs.verify-attestation }}
+        GH_TOKEN: ${{ github.token }}
+      run: '"$GITHUB_ACTION_PATH/install.sh"'
+
+    - name: Upload source maps
+      shell: bash
+      env:
+        DIR: ${{ inputs.dir }}
+        RELEASE: ${{ inputs.release }}
+        URL_PREFIX: ${{ inputs.url-prefix }}
+        SOURCES: ${{ inputs.sources }}
+        DELETE: ${{ inputs.delete }}
+        DRY_RUN: ${{ inputs.dry-run }}
+        INPUT_UPLOAD_TOKEN: ${{ inputs.upload-token }}
+        INPUT_DSN: ${{ inputs.dsn }}
+      run: '"$GITHUB_ACTION_PATH/upload.sh"'

@@ -1,0 +1,44 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The action itself, on each kind of runner: it installs the latest tlm,
+  # checked, and makes a dry run, which sends nothing.
+  action:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - id: tlm
+        uses: ./
+        with:
+          dir: test/dist
+          url-prefix: /assets
+          dry-run: true
+      - name: It ran the installed tlm
+        env:
+          VERSION: ${{ steps.tlm.outputs.tlm-version }}
+        run: |
+          test -n "$VERSION"
+          tlm --version | grep -F "tlm $VERSION"
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - run: shellcheck install.sh upload.sh
